@@ -19,7 +19,6 @@
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
     "nordnet": "^1.1.0",
-    "phantomjs-prebuilt": "^2.1.16",
     "tessel-io": "^1.0.1",
     "zombie": "^5.0.7"
   }
