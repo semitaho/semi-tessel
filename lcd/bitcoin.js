@@ -40,7 +40,7 @@ function buyPromiseFn(client, account) {
               console.log('average', smaLong);
               console.log('buy', buyAverage);
               console.log('raja', smaLong - buyAverage);
-              if (smaLong - buyAverage > 1.5) {
+              if (smaLong - buyAverage > 3) {
                 return buy(account, txn.amount.amount, 'EUR');
               }
               return true;
