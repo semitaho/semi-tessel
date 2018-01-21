@@ -28,10 +28,12 @@ function buyPromiseFn(client, account) {
   setTimeout(() =>
       Promise.all([getTransaction(account), getBuyPrice(client, {currencyPair: 'ETH-EUR'})])
         .then(promises => {
+          console.log('osto');
           const [txn, price] = promises;
           checkBuyPrice(parseFloat(price.data.amount));
 
           if ('completed' === txn.status && txn.sell) {
+            console.log('aktiivinen');
             if (buyQueue.length >= AVERAGE_LIMIT) {
               const smaLong = average(buyQueue.slice(buyQueue.length - AVERAGE_LIMIT, buyQueue.length));
               const buyAverage = average(buyQueue.slice(buyQueue.length - BUY_LIMIT, buyQueue.length));
@@ -40,19 +42,16 @@ function buyPromiseFn(client, account) {
               console.log('raja', smaLong - buyAverage);
               if (smaLong - buyAverage > 1.5) {
                 return buy(account, txn.amount.amount, 'EUR');
-
               }
               return true;
-
-
             }
-
           }
           return true;
 
 
         })
         .then(success => {
+          console.log(" ");
           buyPromiseFn(client, account);
         }).catch(err => {
         console.log('err', err);
@@ -75,7 +74,7 @@ function checkBuyPrice(amount) {
     }
     buyQueue.push(amount)
   }
-  console.log('queue', buyQueue);
+  console.log('queue', buyQueue.slice(buyQueue.length - 10, buyQueue.length));
 
 }
 
@@ -86,22 +85,23 @@ function sellPromiseFn(client, account) {
         .then(promises => {
           const date = new Date();
           const [txn, success] = promises;
-          console.log('klo: ' + (date.getHours() + ':' + parseKlo(date.getMinutes()) + ":" + parseKlo(date.getSeconds())));
-          if ('completed' === txn.status) {
-            if (txn.buy) {
-              const ostohyoty = (success.data.amount * txn.amount.amount) - txn.native_amount.amount;
-              console.log('ostettu', txn.native_amount.amount);
-              console.log('myyntihinta', success.data.amount);
+          console.log('myynti');
+          if ('completed' === txn.status && txn.buy) {
+            console.log('aktiivinen');
 
-              console.log('erotus:' + ostohyoty);
-              if (ostohyoty > 1.5) {
-                console.log('voidaan myydä: ' + txn.amount.amount);
-                return sell(account, txn.amount.amount, 'ETH')
-                  .then(success => {
-                    console.log('myyty', success);
-                    return true;
-                  });
-              }
+            const ostohyoty = (success.data.amount * txn.amount.amount) - txn.native_amount.amount;
+            console.log('ostettu', txn.native_amount.amount);
+            console.log('myyntihinta', success.data.amount);
+            console.log('ETH myynti',txn.amount.amount);
+            console.log('erotus:' + ostohyoty);
+            if (ostohyoty > 3) {
+              console.log('voidaan myydä: ' + txn.amount.amount);
+              return sell(account, txn.amount.amount, 'ETH')
+                .then(success => {
+                  console.log('myyty', success);
+                  return true;
+                });
+
             }
           }
           return true;
